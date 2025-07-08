@@ -4,21 +4,36 @@ import (
 	"os"
 	"fmt"
 	"bufio"
+	"io"
 )
 
-func main() {
-	in := bufio.NewScanner(os.Stdin)
-	alreadySeen := make(map[string]bool)
+func uniq(input io.Reader, output io.Writer) error {
+	in := bufio.NewScanner(input)
 
-
+	var prev string
 	for in.Scan() {
 		txt := in.Text()
 
-		if _, found := alreadySeen[txt]; found {
+		if prev == txt {
 			continue
 		}
 
-		alreadySeen[txt] = true
-		fmt.Println(txt)
+		if txt < prev {
+			return fmt.Errorf("file not sorted")
+		}
+
+		prev = txt
+
+		fmt.Fprintln(output, txt)
+	}
+
+	return nil
+}
+
+func main() {
+	err := uniq(os.Stdin, os.Stdout)
+
+	if err != nil {
+		panic(err.Error())
 	}
 }
